@@ -155,7 +155,7 @@
 
 <script>
 /* ===== CONFIGURAÇÃO ===== mesma URL usada no index.html */
-const API_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw_ImftI8WuLueBYuUxaC9dz03tU52lAeBbbLBMEeqtSgWQRlE4pzpDbpRfQM2XG2cD/exec';
 
 const DEMO = !/^https:\/\/script\.google\.com\//.test(API_URL);
 const $ = s => document.querySelector(s);
@@ -178,7 +178,7 @@ const demoDb = [
 ].map((r,i)=>({protocolo:r[0],nome:r[1],categoria:r[2],turma:r[3],horario:r[4],cpf:'1234567890'+i,cpfMascarado:'***.456.789-**',conselho:'COREN-BA 1234'+i,presente:i===1,checkinEm:i===1?'08:52':''}));
 function demoApi(p){
   return new Promise(res => setTimeout(() => {
-    if (p.action === 'lista') return res({ok:true, janela:{aberta:true,teste:false,texto:'demo'}, pessoas:demoDb, turmas:[{id:'T1',nome:'Turma 01',horario:'09h',vagas:10},{id:'T2',nome:'Turma 02',horario:'10h',vagas:10}]});
+    if (p.action === 'lista') return res({ok:true, janela:{aberta:true,teste:false,texto:'demo'}, pessoas:demoDb, turmas:[{id:'T1',nome:'Turma 01',horario:'09h',vagas:15},{id:'T2',nome:'Turma 02',horario:'10h',vagas:15}]});
     const x = demoDb.find(d=>d.protocolo===p.protocolo); x.presente = p.presente;
     x.checkinEm = p.presente ? new Date().toTimeString().slice(0,5) : ''; x.checkinPor = p.presente ? OPERADOR : '';
     res({ok:true, protocolo:x.protocolo, presente:x.presente, checkinEm:x.checkinEm, checkinPor:x.checkinPor});
@@ -276,7 +276,7 @@ $('#btnImprimir').onclick = () => {
     return `<div class="folha">
       <div class="topo"><img src="${logo}" alt=""><div><h2>LISTA DE PRESENÇA – Capacitação em Punção Intraóssea</h2>
       <p>UPED – Unidade Pediátrica de Juazeiro · Educação Permanente em Saúde</p>
-      <p><b>${esc(t.nome)} – ${esc(t.horario)}</b> · 28/11/2026 (sábado) · Instrutor: Dr. Thiago Paixo – Médico Cirurgião Pediátrico</p></div></div>
+      <p><b>${esc(t.nome)} – ${esc(t.horario)}</b> · 28/11/2026 (sábado) · Instrutor: Dr. Thiago Paixão – Cirurgião Pediátrico</p></div></div>
       <table><thead><tr><th>Nº</th><th>Nome completo</th><th>Categoria</th><th>Conselho</th><th>CPF</th><th>Protocolo</th><th>Assinatura</th></tr></thead>
       <tbody>${linhas}${extras}</tbody></table>
       <p style="margin-top:8px">Conferir documento com foto. Gerada em ${new Date().toLocaleString('pt-BR')} · ${lst.length} inscrito(s).</p>
