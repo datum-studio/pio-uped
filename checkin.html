@@ -101,6 +101,21 @@
     .folha .rod span{flex:1;border-top:1px solid #000;padding-top:4px;text-align:center}
     .folha .obs{margin-top:5px;font-size:10.5px;color:#444}
   }
+  .btn-add{width:100%;border:2px dashed var(--azul);background:#f3f4ff;color:var(--azul);border-radius:14px;padding:13px;font:800 15px 'Nunito',system-ui,sans-serif;cursor:pointer;margin:0 0 12px}
+  .modal{position:fixed;inset:0;background:rgba(20,20,40,.55);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .modal.on{display:flex}
+  .modal .caixa{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:20px 18px 24px}
+  @media(min-width:600px){.modal{align-items:center}.modal .caixa{border-radius:20px}}
+  .modal h2{color:var(--azul);font-size:22px;margin:0 0 4px}
+  .modal .sub{color:var(--cinza);font-size:13.5px;margin:0 0 14px}
+  .modal label.r{display:block;font-weight:800;font-size:14px;margin:10px 0 5px}
+  .modal input[type=text],.modal input[type=email],.modal input[type=tel],.modal select{width:100%;font:600 16px 'Nunito',system-ui,sans-serif;padding:11px 12px;border:2px solid var(--linha);border-radius:12px;background:#fff}
+  .modal .chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;font-weight:600}
+  .modal .chk input{width:20px;height:20px;flex:0 0 20px;accent-color:var(--azul)}
+  .modal .linha2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .modal .erroM{color:var(--vermelho);font-weight:700;font-size:14px;min-height:20px;margin-top:10px}
+  .modal .bts{display:flex;gap:10px;margin-top:6px}
+  .modal .bts button{flex:1}
   .toast{opacity:0;pointer-events:none;position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(120px);background:var(--tinta);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;transition:.25s;z-index:9;max-width:90%}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -140,6 +155,7 @@
 
     <div class="abas" id="abas"></div>
 
+    <button class="btn-add" id="btnAdd">+ Inscrição presencial</button>
     <div class="busca">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="busca" type="search" placeholder="Buscar por nome, CPF ou protocolo" autocomplete="off">
@@ -152,6 +168,27 @@
     <div class="atual" id="atual"></div>
   </section>
 </main>
+<div class="modal" id="modal">
+  <div class="caixa">
+    <h2>Inscrição presencial</h2>
+    <p class="sub">Para participantes autorizados pela Direção a se inscrever no local. O registro fica vinculado ao seu nome.</p>
+    <label class="r" for="mNome">Nome completo</label><input type="text" id="mNome" autocomplete="off">
+    <div class="linha2">
+      <div><label class="r" for="mCpf">CPF</label><input type="tel" id="mCpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00"></div>
+      <div><label class="r" for="mTel">Telefone (opcional)</label><input type="tel" id="mTel" inputmode="numeric" maxlength="15"></div>
+    </div>
+    <label class="r" for="mEmail">E-mail (para receber o certificado)</label><input type="email" id="mEmail" autocomplete="off">
+    <div class="linha2">
+      <div><label class="r" for="mCat">Categoria</label><select id="mCat"><option value="">Selecione</option><option>Médico(a)</option><option>Enfermeiro(a)</option></select></div>
+      <div><label class="r" for="mCons">Conselho</label><input type="text" id="mCons" placeholder="CRM / COREN"></div>
+    </div>
+    <label class="r" for="mTurma">Turma</label><select id="mTurma"></select>
+    <label class="chk"><input type="checkbox" id="mPres" checked><span>Já marcar a presença agora</span></label>
+    <label class="chk"><input type="checkbox" id="mLgpd"><span>A pessoa autorizou o uso dos dados para inscrição, presença e certificado (LGPD).</span></label>
+    <div class="erroM" id="mErro"></div>
+    <div class="bts"><button class="sec" id="mCancelar" type="button">Cancelar</button><button class="btn" id="mSalvar" type="button" style="margin-top:0">Confirmar inscrição</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div id="impressao"></div>
 
@@ -175,12 +212,13 @@ async function api(payload){
 /* ---- demonstração ---- */
 const demoDb = [
   ['PIO26-001','Ana Beatriz Souza Lima','Enfermeiro(a)','Turma 01','09h'],['PIO26-002','Carlos Eduardo Rocha','Médico(a)','Turma 01','09h'],
-  ['PIO26-003','Maria das Graças Nunes','Técnico(a) de Enfermagem','Turma 01','09h'],['PIO26-004','João Pedro Alves','Técnico(a) de Enfermagem','Turma 02','10h'],
+  ['PIO26-003','Maria das Graças Nunes','Enfermeiro(a)','Turma 01','09h'],['PIO26-004','João Pedro Alves','Enfermeiro(a)','Turma 02','10h'],
   ['PIO26-005','Fernanda Oliveira Santos','Enfermeiro(a)','Turma 02','10h'],['PIO26-006','Rafael Menezes Costa','Médico(a)','Turma 02','10h']
 ].map((r,i)=>({protocolo:r[0],nome:r[1],categoria:r[2],turma:r[3],horario:r[4],cpf:'1234567890'+i,cpfMascarado:'***.456.789-**',conselho:'COREN-BA 1234'+i,presente:i===1,checkinEm:i===1?'08:52':''}));
 function demoApi(p){
   return new Promise(res => setTimeout(() => {
     if (p.action === 'lista') return res({ok:true, janela:{aberta:true,teste:false,texto:'demo'}, pessoas:demoDb, turmas:[{id:'T1',nome:'Turma 01',horario:'09h',vagas:15},{id:'T2',nome:'Turma 02',horario:'10h',vagas:15}]});
+    if (p.action === 'inscreverLocal'){ const n=demoDb.length+1; demoDb.push({protocolo:'X26-0'+n, nome:p.dados.nome, categoria:p.dados.categoria, turma:demoDb[0].turma, horario:demoDb[0].horario, cpf:p.dados.cpf, cpfMascarado:'***.***.***-**', conselho:p.dados.conselho, presente:p.dados.presente, checkinEm:p.dados.presente?'11:50':'', checkinPor:OPERADOR}); return res({ok:true, protocolo:'X', nome:p.dados.nome, presente:p.dados.presente}); }
     const x = demoDb.find(d=>d.protocolo===p.protocolo); x.presente = p.presente;
     x.checkinEm = p.presente ? new Date().toTimeString().slice(0,5) : ''; x.checkinPor = p.presente ? OPERADOR : '';
     res({ok:true, protocolo:x.protocolo, presente:x.presente, checkinEm:x.checkinEm, checkinPor:x.checkinPor});
@@ -267,6 +305,35 @@ async function alternar(btn){
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),2200); }
 
 $('#busca').addEventListener('input', render);
+
+/* ---- Inscrição no local (liberada pela Direção) ---- */
+const digM = s => (s||'').replace(/\D/g,'');
+function cpfOk(c){ if(!/^\d{11}$/.test(c)||/^(\d)\1{10}$/.test(c))return false; for(let t=9;t<11;t++){let s=0;for(let i=0;i<t;i++)s+=+c[i]*(t+1-i);if(((s*10)%11)%10!==+c[t])return false;} return true; }
+$('#mCpf').addEventListener('input', e => { let v=digM(e.target.value).slice(0,11); e.target.value=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); });
+$('#btnAdd').onclick = () => {
+  $('#mTurma').innerHTML = TURMAS.map(t => `<option value="${esc(t.id)}">${esc(t.horario)} · ${esc(t.nome)}</option>`).join('');
+  if (ABA !== 'todas') $('#mTurma').value = ABA;
+  ['mNome','mCpf','mTel','mEmail','mCons'].forEach(id => $('#'+id).value=''); $('#mCat').value=''; $('#mLgpd').checked=false; $('#mPres').checked=JANELA.aberta; $('#mPres').disabled=!JANELA.aberta;
+  $('#mErro').textContent=''; $('#modal').classList.add('on'); setTimeout(()=>$('#mNome').focus(),100);
+};
+$('#mCancelar').onclick = () => $('#modal').classList.remove('on');
+$('#mSalvar').onclick = async () => {
+  const d = {nome:$('#mNome').value.trim(), cpf:digM($('#mCpf').value), telefone:digM($('#mTel').value), email:$('#mEmail').value.trim(),
+             categoria:$('#mCat').value, conselho:$('#mCons').value.trim(), turma:$('#mTurma').value, presente:$('#mPres').checked, lgpd:$('#mLgpd').checked};
+  const e = d.nome.split(' ').length<2 ? 'Informe o nome completo.' : !cpfOk(d.cpf) ? 'CPF inválido.' : !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email) ? 'E-mail inválido.' :
+            !d.categoria ? 'Selecione a categoria.' : d.conselho.length<3 ? 'Informe o conselho.' : !d.lgpd ? 'Marque a autorização de uso dos dados.' : '';
+  if (e){ $('#mErro').textContent = e; return; }
+  const b=$('#mSalvar'); b.disabled=true; b.textContent='Salvando…';
+  try{
+    const r = await api({action:'inscreverLocal', dados:d});
+    if (!r.ok) throw new Error(r.erro);
+    $('#modal').classList.remove('on');
+    toast(`${r.nome.split(' ')[0]} inscrito(a)` + (r.presente ? ' com presença' : ''));
+    const l = await api({action:'lista'}); if (l.ok) receber(l);
+  }catch(err){ $('#mErro').textContent = err.message || 'Falha de conexão.'; }
+  b.disabled=false; b.textContent='Confirmar inscrição';
+};
+
 
 /* ---- Plano B: lista impressa ---- */
 $('#btnImprimir').onclick = () => {
